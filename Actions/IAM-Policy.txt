@@ -1,0 +1,76 @@
+Configure GitHub OIDC Provider
+
+IAM
+ └─ Identity Providers
+      └─ Add Provider
+
+Step 2: Create Deployment Role
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        },
+        "StringLike": {
+          "token.actions.githubusercontent.com:sub": "repo:ORG_NAME/REPO_NAME:*"
+        }
+      }
+    }
+  ]
+}
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Step 3: Permissions Required
+
+For ECS Deployment
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeServices",
+        "ecs:UpdateService",
+        "ecs:DescribeClusters",
+        "ecs:DescribeTaskDefinition"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+
+++++++++++++++++++++++++++++++++++++
+
+For Lambda Deployment
+
+{
+  "Effect": "Allow",
+  "Action": [
+    "lambda:GetFunction",
+    "lambda:UpdateFunctionCode",
+    "lambda:PublishVersion",
+    "lambda:UpdateAlias",
+    "lambda:GetAlias"
+  ],
+  "Resource": "*"
+}
+
+
+For ECR Access
+
+{
+  "Effect": "Allow",
+  "Action": [
+    "ecr:DescribeImages",
+    "ecr:DescribeRepositories",
+    "ecr:ListImages"
+  ],
+  "Resource": "*"
+}
